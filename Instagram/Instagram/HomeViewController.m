@@ -7,8 +7,11 @@
 
 #import "HomeViewController.h"
 #import <Parse/Parse.h>
+#import "PostCell.h"
 
-@interface HomeViewController ()
+@interface HomeViewController () <UITableViewDataSource>
+@property (weak, nonatomic) IBOutlet UITableView *tableView;
+@property (nonatomic, strong) NSArray *posts;
 
 @end
 
@@ -16,7 +19,20 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+    UIRefreshControl *refreshControl = [[UIRefreshControl alloc] init];
+    [refreshControl addTarget:self action:@selector(beginRefresh:) forControlEvents:UIControlEventValueChanged];
+    [self.tableView insertSubview:refreshControl atIndex:0];
+    
+    self.tableView.dataSource = self;
+    
+    [self loadData];
     // Do any additional setup after loading the view.
+}
+
+- (void)beginRefresh:(UIRefreshControl *)refreshControl {
+    [self loadData];
+    [refreshControl endRefreshing];
 }
 
 /*
@@ -28,6 +44,24 @@
     // Pass the selected object to the new view controller.
 }
 */
+
+- (void) loadData{ // gets 20 posts into array
+    PFQuery *query = [PFQuery queryWithClassName:@"Post"];
+    [query orderByDescending:@"createdAt"];
+    [query includeKey:@"author"]; 
+    query.limit = 20;
+    self.posts = [NSArray array];
+    
+    // fetch data asynchronously
+    [query findObjectsInBackgroundWithBlock:^(NSArray *rawPosts, NSError *error) {
+        if (rawPosts != nil) {
+            self.posts = rawPosts; 
+            [self.tableView reloadData];
+        } else {
+            NSLog(@"%@", error.localizedDescription);
+        }
+    }];
+}
 
 - (IBAction)didTapCompose:(id)sender {
     [self performSegueWithIdentifier:@"composeSegue" sender:nil];
@@ -44,6 +78,19 @@
         }
     }];
     [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (nonnull UITableViewCell *)tableView:(nonnull UITableView *)tableView cellForRowAtIndexPath:(nonnull NSIndexPath *)indexPath {
+    PostCell *cell = [tableView dequeueReusableCellWithIdentifier:@"postCell" forIndexPath:indexPath];
+    
+    cell.post = self.posts[indexPath.row];
+    [cell loadCellData];
+    
+    return cell;
+}
+
+- (NSInteger)tableView:(nonnull UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return self.posts.count;
 }
 
 @end
