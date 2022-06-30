@@ -8,6 +8,7 @@
 #import "HomeViewController.h"
 #import <Parse/Parse.h>
 #import "PostCell.h"
+#import "DetailsViewController.h"
 
 @interface HomeViewController () <UITableViewDataSource>
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
@@ -35,15 +36,23 @@
     [refreshControl endRefreshing];
 }
 
-/*
+
 #pragma mark - Navigation
 
 // In a storyboard-based application, you will often want to do a little preparation before navigation
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
     // Get the new view controller using [segue destinationViewController].
     // Pass the selected object to the new view controller.
+    if([segue.identifier isEqualToString:@"detailsSegue"]){
+        NSLog(@"Going into details view 🧐");
+        NSIndexPath *indexPath = [self.tableView indexPathForSelectedRow];
+        Post *postToPass = self.posts[indexPath.row];
+        
+        DetailsViewController *detailsController = [segue destinationViewController];
+        detailsController.post = postToPass;
+    }
 }
-*/
+
 
 - (void) loadData{ // gets 20 posts into array
     PFQuery *query = [PFQuery queryWithClassName:@"Post"];
