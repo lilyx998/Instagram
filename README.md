@@ -36,6 +36,7 @@ The following **optional** features are implemented:
 ## Video Walkthrough
 
 Here's a walkthrough of implemented user stories:
+
 ![instagram](https://user-images.githubusercontent.com/34987475/176794024-70c9a512-0f91-47f1-b393-9b7fcebfd986.gif)
 
 ## Credits
